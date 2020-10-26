@@ -1,0 +1,8 @@
+click==7.1.2
+cvui==2.7b1
+numpy==1.16.6
+pkgconfig==1.5.1
+toml==0.10.1
+pytz==2020.1
+pathlib==1.0.1
+opencv-python==4.2.0.32
