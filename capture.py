@@ -14,6 +14,7 @@ from datetime import datetime
 from scripts.rgb_manager import RgbCameraManager
 from scripts.camera_parameter import IntrinsicParam
 from scripts.lens_undistortion import LensUndistorter
+from functools import partial
 
 #    now = datetime.datetime.today()
 #    date = str(now.year) + "-" + str(now.month) + "-" + str(now.day) + "-" + str(now.hour) + ":" + str(now.minute) + ":" + str(now.second)
@@ -64,40 +65,48 @@ def save_image(see3cam_rgb_img, save_dir):
     cv2.waitKey(10)
 
 
+def scaling_int(int_num, scale):
+    return int(int_num*scale)
+    
+
 @click.command()
 @click.option("--toml-path", "-t", default="{}/cfg/camera_parameter.toml".format(SCRIPT_DIR))
 @click.option("--directory-for-save", "-s", default="{}/data".format(SCRIPT_DIR))
 @click.option("--save-raw-data", "-raw", is_flag=True)
-def main(toml_path, directory_for_save, save_raw_data):
+@click.option("--scale", "-sc", default=0.75)
+def main(toml_path, directory_for_save, save_raw_data, scale):
     make_save_dir(directory_for_save)
     see3cam_mng = RgbCameraManager(toml_path)
     lens_undistorter = LensUndistorter(toml_path)
+    scaling = partial(scaling_int, scale=scale)
 
     WINDOW_NAME = "Capture"
     cvui.init(WINDOW_NAME)
     while True:
         key = cv2.waitKey(10)
-        frame = np.zeros((960, 1400, 3), np.uint8)
+        frame = np.zeros((scaling(960), scaling(1400), 3), np.uint8)
         frame[:] = (49, 52, 49)
 
         status = see3cam_mng.update()
 
         number_of_saved_frame = len(glob.glob(os.path.join(directory_for_save, "*.png")))
-        cvui.printf(frame, 50, 750, 0.8, 0x00ff00, "Number of Captured Images : %d", number_of_saved_frame)
+        cvui.printf(frame, 50, scaling(750), 0.8, 0x00ff00, "Number of Captured Images : %d", number_of_saved_frame)
         if status:
             see3cam_rgb_image_raw = see3cam_mng.read()
             see3cam_rgb_image_undist = lens_undistorter.correction(see3cam_rgb_image_raw)
-            see3cam_rgb_resize = cv2.resize(see3cam_rgb_image_undist, (1280, 720))
+            scaled_width = scaling(1280)
+            scaled_height = scaling(720)
+            see3cam_rgb_resize = cv2.resize(see3cam_rgb_image_undist, (scaled_width, scaled_height))
 
             cvui.text(frame, 10, 10, 'See3CAM', 0.5)
-            frame[10:730, 10:1290, :] = see3cam_rgb_resize
-            if cvui.button(frame, 50, 800, 200, 100, "capture image") or key & 0xFF == ord('s'):
+            frame[10:scaled_height+10, 10:scaled_width+10, :] = see3cam_rgb_resize
+            if cvui.button(frame, 50, scaling(800), 200, 100, "capture image") or key & 0xFF == ord('s'):
                 if status:
                     if save_raw_data:
                         save_image(see3cam_rgb_image_raw, directory_for_save)
                     else:
                         save_image(see3cam_rgb_image_undist, directory_for_save)
-            if cvui.button(frame, 300, 800, 200, 100, "erase"):
+            if cvui.button(frame, 300, scaling(800), 200, 100, "erase"):
                 clean_save_dir(directory_for_save)
 
         if key == 27 or key == ord('q'):
