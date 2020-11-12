@@ -67,8 +67,8 @@ def save_image(see3cam_rgb_img, save_dir):
 @click.command()
 @click.option("--toml-path", "-t", default="{}/cfg/dualzense_out.toml".format(SCRIPT_DIR))
 @click.option("--directory-for-save", "-s", default="{}/data".format(SCRIPT_DIR))
-@click.option("--enable-undistortion", "-u", is_flag=True)
-def main(toml_path, directory_for_save, enable_undistortion):
+@click.option("--save-raw-data", "-raw", is_flag=True)
+def main(toml_path, directory_for_save, save_raw_data):
     make_save_dir(directory_for_save)
     see3cam_mng = RgbCameraManager(toml_path)
     lens_undistorter = LensUndistorter(toml_path)
@@ -85,18 +85,18 @@ def main(toml_path, directory_for_save, enable_undistortion):
         number_of_saved_frame = len(glob.glob(os.path.join(directory_for_save, "*.png")))
         cvui.printf(frame, 50, 750, 0.8, 0x00ff00, "Number of Captured Images : %d", number_of_saved_frame)
         if status:
-            see3cam_rgb_image = see3cam_mng.read()
-            if enable_undistortion:
-                see3cam_rgb_image_undist = lens_undistorter.correction(see3cam_rgb_image)
-                see3cam_rgb_resize = cv2.resize(see3cam_rgb_image_undist, (1280, 720))
-            else:
-                see3cam_rgb_resize = cv2.resize(see3cam_rgb_image, (1280, 720))
+            see3cam_rgb_image_raw = see3cam_mng.read()
+            see3cam_rgb_image_undist = lens_undistorter.correction(see3cam_rgb_image_raw)
+            see3cam_rgb_resize = cv2.resize(see3cam_rgb_image_undist, (1280, 720))
 
             cvui.text(frame, 10, 10, 'See3CAM', 0.5)
             frame[10:730, 10:1290, :] = see3cam_rgb_resize
             if cvui.button(frame, 50, 800, 200, 100, "capture image") or key & 0xFF == ord('s'):
                 if status:
-                    save_image(see3cam_rgb_image, directory_for_save)
+                    if save_raw_data:
+                        save_image(see3cam_rgb_image_raw, directory_for_save)
+                    else:
+                        save_image(see3cam_rgb_image_undist, directory_for_save)
             if cvui.button(frame, 300, 800, 200, 100, "erase"):
                 clean_save_dir(directory_for_save)
 

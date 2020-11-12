@@ -1,4 +1,3 @@
-
 [Rgb]
 device_id = "/dev/v4l/by-id/usb-e-con_Systems_See3CAM_CU20_18050204-video-index0"
 width = 1920
