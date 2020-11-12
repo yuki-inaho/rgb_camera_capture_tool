@@ -23,7 +23,7 @@ class RgbCameraManager:
 
     def update(self):
         # For latency related with buffer
-        [self.cap.read() for i in range(5)]
+        [self.cap.read() for i in range(2)]
         (self.is_grabbed, self.frame) = self.cap.read()
         return self.is_grabbed
 
