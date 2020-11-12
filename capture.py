@@ -65,7 +65,7 @@ def save_image(see3cam_rgb_img, save_dir):
 
 
 @click.command()
-@click.option("--toml-path", "-t", default="{}/cfg/dualzense_out.toml".format(SCRIPT_DIR))
+@click.option("--toml-path", "-t", default="{}/cfg/camera_parameter.toml".format(SCRIPT_DIR))
 @click.option("--directory-for-save", "-s", default="{}/data".format(SCRIPT_DIR))
 @click.option("--save-raw-data", "-raw", is_flag=True)
 def main(toml_path, directory_for_save, save_raw_data):
