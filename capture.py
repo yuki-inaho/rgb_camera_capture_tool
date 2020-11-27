@@ -26,8 +26,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def is_wdr_enabled(camera_name, cfg_path):
     toml_dict = toml.load(open(cfg_path))
-    isWDR = int(toml_dict[camera_name]["range1"]) >= 0 and \
-        int(toml_dict[camera_name]["range2"]) >= 0
+    isWDR = int(toml_dict[camera_name]["range1"]) >= 0 and int(toml_dict[camera_name]["range2"]) >= 0
     isRGB = int(toml_dict[camera_name]["rgb_image"]) == 1
     do_exit = False
     if not isWDR:
@@ -41,10 +40,9 @@ def is_wdr_enabled(camera_name, cfg_path):
 
 
 def get_time():
-    utc_now = datetime.now(timezone('UTC'))
-    jst_now = utc_now.astimezone(timezone('Asia/Tokyo'))
-    time = str(jst_now).split(".")[0].split(" ")[
-        0] + "_" + str(jst_now).split(".")[0].split(" ")[1]
+    utc_now = datetime.now(timezone("UTC"))
+    jst_now = utc_now.astimezone(timezone("Asia/Tokyo"))
+    time = str(jst_now).split(".")[0].split(" ")[0] + "_" + str(jst_now).split(".")[0].split(" ")[1]
     return time
 
 
@@ -66,8 +64,8 @@ def save_image(see3cam_rgb_img, save_dir):
 
 
 def scaling_int(int_num, scale):
-    return int(int_num*scale)
-    
+    return int(int_num * scale)
+
 
 @click.command()
 @click.option("--toml-path", "-t", default="{}/cfg/camera_parameter.toml".format(SCRIPT_DIR))
@@ -90,7 +88,7 @@ def main(toml_path, directory_for_save, save_raw_data, scale):
         status = see3cam_mng.update()
 
         number_of_saved_frame = len(glob.glob(os.path.join(directory_for_save, "*.png")))
-        cvui.printf(frame, 50, scaling(750), 0.8, 0x00ff00, "Number of Captured Images : %d", number_of_saved_frame)
+        cvui.printf(frame, 50, scaling(750), 0.8, 0x00FF00, "Number of Captured Images : %d", number_of_saved_frame)
         if status:
             see3cam_rgb_image_raw = see3cam_mng.read()
             see3cam_rgb_image_undist = lens_undistorter.correction(see3cam_rgb_image_raw)
@@ -98,9 +96,9 @@ def main(toml_path, directory_for_save, save_raw_data, scale):
             scaled_height = scaling(720)
             see3cam_rgb_resize = cv2.resize(see3cam_rgb_image_undist, (scaled_width, scaled_height))
 
-            cvui.text(frame, 10, 10, 'See3CAM', 0.5)
-            frame[10:scaled_height+10, 10:scaled_width+10, :] = see3cam_rgb_resize
-            if cvui.button(frame, 50, scaling(800), 200, 100, "capture image") or key & 0xFF == ord('s'):
+            cvui.text(frame, 10, 10, "See3CAM", 0.5)
+            frame[10 : scaled_height + 10, 10 : scaled_width + 10, :] = see3cam_rgb_resize
+            if cvui.button(frame, 50, scaling(800), 200, 100, "capture image") or key & 0xFF == ord("s"):
                 if status:
                     if save_raw_data:
                         save_image(see3cam_rgb_image_raw, directory_for_save)
@@ -109,7 +107,7 @@ def main(toml_path, directory_for_save, save_raw_data, scale):
             if cvui.button(frame, 300, scaling(800), 200, 100, "erase"):
                 clean_save_dir(directory_for_save)
 
-        if key == 27 or key == ord('q'):
+        if key == 27 or key == ord("q"):
             break
 
         cvui.update()
