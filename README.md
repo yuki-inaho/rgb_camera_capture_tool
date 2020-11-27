@@ -13,7 +13,17 @@ cd see3cam_capture_tool
 pip install -r requirements.txt
 ```
 
-# Run capture app
+# Run capturing app
 ```
 python capture.py
+```
+
+# Run capturing app with time-lapse
+To capture image per 10 minute, run below command
+```
+python capture.py --timelapse-mode --interval-minute 1
+```
+or
+```
+python capture.py -lapse -i 10
 ```
