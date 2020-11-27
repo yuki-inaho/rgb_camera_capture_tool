@@ -19,7 +19,7 @@ python capture.py
 ```
 
 # Run capturing app with time-lapse
-To capture image per 10 minute, run below command
+To capture a image per 10 minute, run below command
 ```
 python capture.py --timelapse-mode --interval-minute 1
 ```
