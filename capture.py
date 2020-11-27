@@ -107,11 +107,9 @@ def main(toml_path, directory_for_save, save_raw_data, scale, timelapse_mode, in
             capture_condition = cvui.button(frame, 50, scaling(800), 200, 100, "capture image") or key & 0xFF == ord("s")
             if timelapse_mode:
                 current_time = datetime.now()
-                print("{}, {}".format(current_time.minute, current_time.minute % interval_minute))
                 if  current_time.minute % interval_minute == 0 and current_time.second % 60 == 0:
                     print("captured:{}, time:{}".format(number_of_saved_frame, current_time))
                     capture_condition = True
-                print(current_time, capture_condition)
 
             if capture_condition:
                 if status:
