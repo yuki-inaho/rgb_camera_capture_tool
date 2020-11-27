@@ -72,7 +72,9 @@ def scaling_int(int_num, scale):
 @click.option("--directory-for-save", "-s", default="{}/data".format(SCRIPT_DIR))
 @click.option("--save-raw-data", "-raw", is_flag=True)
 @click.option("--scale", "-sc", default=0.75)
-def main(toml_path, directory_for_save, save_raw_data, scale):
+@click.option("--timelapse-mode", "-lapse", is_flag=True)
+@click.option("--interval-minute", "-i", default=5)
+def main(toml_path, directory_for_save, save_raw_data, scale, timelapse_mode, interval_minute):
     make_save_dir(directory_for_save)
     see3cam_mng = RgbCameraManager(toml_path)
     lens_undistorter = LensUndistorter(toml_path)
@@ -89,6 +91,7 @@ def main(toml_path, directory_for_save, save_raw_data, scale):
 
         number_of_saved_frame = len(glob.glob(os.path.join(directory_for_save, "*.png")))
         cvui.printf(frame, 50, scaling(750), 0.8, 0x00FF00, "Number of Captured Images : %d", number_of_saved_frame)
+
         if status:
             see3cam_rgb_image_raw = see3cam_mng.read()
             see3cam_rgb_image_undist = lens_undistorter.correction(see3cam_rgb_image_raw)
@@ -98,12 +101,27 @@ def main(toml_path, directory_for_save, save_raw_data, scale):
 
             cvui.text(frame, 10, 10, "See3CAM", 0.5)
             frame[10 : scaled_height + 10, 10 : scaled_width + 10, :] = see3cam_rgb_resize
-            if cvui.button(frame, 50, scaling(800), 200, 100, "capture image") or key & 0xFF == ord("s"):
+
+            # For time lapse capturing
+            capture_condition = cvui.button(frame, 50, scaling(800), 200, 100, "capture image") or key & 0xFF == ord("s")
+            if timelapse_mode:
+                current_time = datetime.now()
+                print("{}, {}".format(current_time.minute, current_time.minute % interval_minute))
+                if  current_time.minute % interval_minute == 0 and current_time.second % 60 == 0:
+                    print("captured:{}, time:{}".format(number_of_saved_frame, current_time))
+                    capture_condition = True
+                print(current_time, capture_condition)
+
+            if capture_condition:
                 if status:
                     if save_raw_data:
                         save_image(see3cam_rgb_image_raw, directory_for_save)
                     else:
                         save_image(see3cam_rgb_image_undist, directory_for_save)
+
+            if timelapse_mode:
+                time.sleep(1)
+
             if cvui.button(frame, 300, scaling(800), 200, 100, "erase"):
                 clean_save_dir(directory_for_save)
 
